@@ -7,6 +7,7 @@ const RafflePage = () => {
     const { raffleData, reserveNumbers, checkMyNumbers } = useContext(RaffleContext);
     const [selectedNumbers, setSelectedNumbers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [buyerInfo, setBuyerInfo] = useState({ name: '', phone: '' });
     const [showMultiBuy, setShowMultiBuy] = useState(false);
     const [multiBuyCount, setMultiBuyCount] = useState('');
@@ -57,7 +58,7 @@ const RafflePage = () => {
         setIsModalOpen(false);
         setSelectedNumbers([]);
         setBuyerInfo({ name: '', phone: '' });
-        alert('Compra registrada! Seus números foram reservados.');
+        setShowSuccessModal(true); // Show custom modal instead of alert
     };
 
     const selectRandom = () => {
@@ -262,6 +263,31 @@ const RafflePage = () => {
 
                         <button onClick={confirmPurchase} className="btn">
                             <Check size={20} /> Já feito
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
+                    <div className="modal-content text-center">
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-green-500/20 p-4 rounded-full">
+                                <Check size={48} className="text-green-500" />
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">Reserva Realizada!</h2>
+                        <p className="text-gray-300 mb-6 leading-relaxed">
+                            O prêmio será entregue mediante o comprovante do Pix feito nesta hora e data da escolha do número.
+                            <br /><br />
+                            <strong className="text-orange-500">Favor guardar seu comprovante.</strong>
+                        </p>
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="btn bg-gray-700 hover:bg-gray-600 w-full"
+                        >
+                            Entendido
                         </button>
                     </div>
                 </div>
