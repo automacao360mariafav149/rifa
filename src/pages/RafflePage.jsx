@@ -242,7 +242,31 @@ const RafflePage = () => {
                                     Admin não cadastrou QR Code
                                 </div>
                             )}
-                            <div className="text-xs text-muted">Escaneie o QR Code acima</div>
+                            <div className="text-xs text-muted mb-4">Escaneie o QR Code acima</div>
+
+                            {raffleData.pixKey && (
+                                <div className="bg-gray-800 p-3 rounded-lg mb-4">
+                                    <div className="text-xs text-muted mb-1 text-left">Chave Pix (Copia e Cola):</div>
+                                    <div className="flex gap-2">
+                                        <input
+                                            readOnly
+                                            value={raffleData.pixKey}
+                                            className="input text-sm bg-black/50 text-white font-mono flex-1"
+                                            onClick={(e) => e.target.select()}
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(raffleData.pixKey);
+                                                alert('Chave Pix copiada!');
+                                            }}
+                                            className="btn secondary px-3 py-2"
+                                            style={{ width: 'auto' }}
+                                        >
+                                            <span className="text-xs font-bold uppercase">Copiar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-3 mb-6">

@@ -278,6 +278,17 @@ const Admin = () => {
                         </div>
                     )}
                 </div>
+
+                <div>
+                    <label className="text-sm text-muted mb-1 block">Chave Pix (Copia e Cola)</label>
+                    <input
+                        name="pixKey"
+                        value={formData.pixKey || ''}
+                        onChange={handleInputChange}
+                        className="input"
+                        placeholder="Ex: 123.456.789-00 ou email@exemplo.com"
+                    />
+                </div>
             </div>
 
             <div className="flex flex-col gap-2">

@@ -172,7 +172,8 @@ export const RaffleProvider = ({ children }) => {
                     total_numbers: newConfig.totalNumbers,
                     draw_date: newConfig.drawDate,
                     item_images: newConfig.itemImages,
-                    qr_code: newConfig.qrCode
+                    qr_code: newConfig.qrCode,
+                    pix_key: newConfig.pixKey
                 })
                 .eq('id', raffleData.id);
 
