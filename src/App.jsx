@@ -73,6 +73,7 @@ export const RaffleProvider = ({ children }) => {
                 drawDate: config.draw_date,
                 itemImages: config.item_images,
                 qrCode: config.qr_code,
+                pixKey: config.pix_key,
                 numbers: numbersMap
             });
 
