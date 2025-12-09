@@ -1,9 +1,10 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useRef } from 'react';
 import { RaffleContext } from '../App';
 import { Check, X, ShoppingCart, Info, Calendar } from 'lucide-react';
 
 const RafflePage = () => {
-    const { raffleData, reserveNumbers } = useContext(RaffleContext);
+
+    const { raffleData, reserveNumbers, checkMyNumbers } = useContext(RaffleContext);
     const [selectedNumbers, setSelectedNumbers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [buyerInfo, setBuyerInfo] = useState({ name: '', phone: '' });
@@ -12,10 +13,14 @@ const RafflePage = () => {
 
     const [isMultiSelectionMode, setIsMultiSelectionMode] = useState(false);
 
+    // State for "My Numbers" removed
+
+    const scrollRef = useRef(null);
+
     // Generate numbers array based on total
     const allNumbers = useMemo(() => {
         return Array.from({ length: raffleData.totalNumbers }, (_, i) => i + 1);
-    }, [raffleData.totalNumbers]);
+    }, [raffleData.totalNumbers, raffleData]);
 
     const handleNumberClick = (num) => {
         if (raffleData.numbers[num]) return; // Já vendido
@@ -70,37 +75,66 @@ const RafflePage = () => {
         const picked = shuffled.slice(0, count);
 
         setSelectedNumbers(picked);
-        setIsModalOpen(true); // Open modal immediately
+        setIsMultiSelectionMode(true); // Switch to multi-mode so the "Pay" button appears
+        // setIsModalOpen(true); // Removed: User must click "Pay" manually now
         setShowMultiBuy(false);
         setMultiBuyCount('');
     };
 
     const totalPrice = selectedNumbers.length * raffleData.price;
 
+    const scroll = (direction) => {
+        if (scrollRef.current) {
+            const { clientWidth } = scrollRef.current;
+            const scrollAmount = direction === 'left' ? -clientWidth : clientWidth;
+            scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
+
     return (
-        <div className="pb-24"> {/* Padding for bottom interaction */}
-            {/* Header */}
-            {/* Header / Carousel */}
-            <div className="relative h-72 bg-gray-800 overflow-hidden">
+        <div className="pb-24">
+            {/* Header / Carousel - Instagram Style */}
+            <div className="relative aspect-square w-full bg-gray-900 group">
                 {/* Image Container with Scroll Snap */}
-                <div className="flex overflow-x-auto snap-x snap-mandatory h-full w-full scrollbar-hide">
+                <div
+                    ref={scrollRef}
+                    className="flex overflow-x-auto snap-x snap-mandatory h-full w-full scrollbar-hide"
+                >
                     {(raffleData.itemImages && raffleData.itemImages.length > 0) ? (
                         raffleData.itemImages.map((img, idx) => (
                             <img
                                 key={idx}
                                 src={img}
                                 alt={`Prêmio ${idx + 1}`}
-                                className="w-full h-full object-cover flex-shrink-0 snap-center"
+                                className="w-full h-full object-cover flex-shrink-0 snap-center block"
                             />
                         ))
                     ) : raffleData.itemImage ? (
-                        <img src={raffleData.itemImage} alt="Prêmio" className="w-full h-full object-cover flex-shrink-0 snap-center" />
+                        <img src={raffleData.itemImage} alt="Prêmio" className="w-full h-full object-cover flex-shrink-0 snap-center block" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted flex-shrink-0 snap-center">
                             Sem foto do prêmio
                         </div>
                     )}
                 </div>
+
+                {/* Arrows */}
+                {raffleData.itemImages && raffleData.itemImages.length > 1 && (
+                    <>
+                        <button
+                            onClick={() => scroll('left')}
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                        </button>
+                        <button
+                            onClick={() => scroll('right')}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        </button>
+                    </>
+                )}
 
                 {/* Dots / Indicators */}
                 {raffleData.itemImages && raffleData.itemImages.length > 1 && (
@@ -117,13 +151,15 @@ const RafflePage = () => {
             </div>
 
             <div className="p-4">
+
+                {/* Payment Modal */}
                 <h1 className="mb-2 text-2xl">{raffleData.title}</h1>
                 <p className="text-muted mb-4">{raffleData.description}</p>
 
                 {raffleData.drawDate && (
                     <div className="flex items-center gap-2 text-orange-400 mb-6 bg-gray-900 p-3 rounded-lg border border-orange-500/30">
                         <Calendar size={18} color="var(--primary)" />
-                        <span className="text-sm">Sorteio: <strong>{new Date(raffleData.drawDate).toLocaleDateString('pt-BR')}</strong> (Loteria Federal)</span>
+                        <span className="text-sm">Sorteio: <strong>{new Date(raffleData.drawDate).toLocaleDateString('pt-BR')} às 20h</strong> (Loteria Federal)</span>
                     </div>
                 )}
 
@@ -166,7 +202,7 @@ const RafflePage = () => {
                 {/* Grid */}
                 <div className="raffle-grid">
                     {allNumbers.map(num => {
-                        const isSold = !!raffleData.numbers[num];
+                        const isSold = !!raffleData.numbers && raffleData.numbers[num] && raffleData.numbers[num].status === 'sold';
                         const isSelected = selectedNumbers.includes(num);
 
                         return (
@@ -182,8 +218,6 @@ const RafflePage = () => {
                     })}
                 </div>
             </div>
-
-            {/* Floating Action Bar removed */}
 
             {/* Payment Modal */}
             {isModalOpen && (
